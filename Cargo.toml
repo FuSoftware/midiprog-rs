@@ -1,0 +1,18 @@
+[package]
+name = "midiprog"
+version = "0.1.0"
+authors = ["Florent Uguet <florent.uguet@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+lazy_static = "1"
+regex = "1"
+midir = "0.6.1"
+
+#[profile.release]
+#panic = 'abort'
+#codegen-units = 1
+#lto = true
+#opt-level = 'z'  # Optimize for size.
