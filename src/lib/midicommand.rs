@@ -16,10 +16,6 @@ impl MidiParameter {
     }
 
     pub fn new_parse(data: &str) -> MidiParameter {
-        /*
-        std::vector<std::string> tokens = split(p, ':', true);
-        this->addParameter(tokens[0], std::stod(tokens[1]) , tokens[2]);
-        */
         let tokens: Vec<&str> = data.split(':').collect();
         let trimmed = tokens.iter().map(|&x| x.trim()).collect::<Vec<_>>();
         MidiParameter::new_str(trimmed[0], trimmed[1].parse::<f32>().expect("Failed to parse parameter size"), trimmed[2])

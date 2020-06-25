@@ -85,11 +85,32 @@ impl Config {
             }
 
             "source" => {
-
+                let mut path: String = if self.current_folder.is_empty() { String::from("") } else { self.current_folder.clone() };
+                path.push_str(command.get_parameter_from_index(0).expect("Expected file name"));
+                self.run_file(path.as_str());
             }
 
             "folder" => {
+                match command.get_parameter("type") {
+                    Some(t) => {
+                        match t.as_str() {
+                            "relative" => {
+                                self.current_folder = "".to_owned();
+                            },
 
+                            "absolute" => {
+                                self.current_folder = "".to_owned();
+                            },
+
+                            _ => {
+                                println!("Wrong folder type, expected 'absolute' or 'relative', got {}", t);
+                            }
+                        }
+                    },
+                    None => {
+                        println!("Expected folder type");
+                    }
+                }
             }
 
             _ => {
@@ -105,78 +126,17 @@ impl Config {
     pub fn get_current_synth_mut(&mut self) -> Option<&mut Synth> {
         self.synths.get_mut(&self.current_synth)
     }
+
+    pub fn get_synth_list(&self) -> Vec<&str> {
+        let mut v: Vec<&str> = Vec::new();
+        for (k, s) in &self.synths {
+            v.push(k.as_str());
+        }
+        return v;
+    }
 }
 
 /*
-void Config::run_file(std::string path)
-{
-    this->curr_folder = get_folder(path);
-    std::vector<Command> commands = CommandParser::parse_commands_file(path);
-    this->run(commands);
-}
-
-void Config::run(std::vector<Command> commands)
-{
-    for(auto c: commands)
-    {
-        this->run(c);
-    }
-}
-
-void Config::run(Command c)
-{
-    else if(c.getName() == "command")
-    {
-        if(this->curr_synth != nullptr)
-        {
-            MIDICommand comm(c.getParameter("name"));
-            comm.addAliases(c.getParameter("alias"));
-            comm.setMidi(c.getParameter("midi"));
-
-            //Parameters
-            size_t i = 0;
-            std::string key = "parameter";
-            while(c.hasNumberedParameter("parameter", i))
-            {
-                std::string p = c.getNumberedParameter("parameter",i);
-                i++;
-                comm.addParameter(p);
-            }
-            this->curr_synth->getCommands()->push_back(comm);
-        }
-    }
-    else if(c.getName() == "source")
-    {
-        std::string path = (this->folder != "" ? this->folder + "/" : "") + c.getParameter(0);
-        this->run_file(path);
-    }
-    else if(c.getName() == "folder")
-    {
-        if(c.hasParameter("type"))
-        {
-            std::string type = c.getParameter("type");
-
-            if(type == "relative")
-            {
-                this->folder = this->curr_folder;
-            }
-            else if (type == "absolute")
-            {
-                this->folder = "";
-            }
-        }
-    }
-    else
-    {
-        std::cout << "Unrecognized command " << c.getName() << std::endl;
-    }
-}
-
-Synth* Config::get_synth(std::string id)
-{
-    return map_has_key(this->synths, id) ? this->synths[id] : nullptr;
-}
-
 void Config::report_parameter_number_error(std::string command, size_t number, size_t found)
 {
     std::cout << "Expected '" << number << "' parameters for the '" << command << "' command. Found '" << found << "'" << std::endl;
@@ -189,14 +149,5 @@ std::vector<std::string> Config::get_synth_list()
         keys.push_back(it->first);
     }
     return keys;
-}
-
-std::vector<Synth*> Config::get_synth_values()
-{
-    std::vector<Synth*> values;
-    for(auto it = this->synths.begin(); it != this->synths.end(); ++it) {
-        values.push_back(it->second);
-    }
-    return values;
 }
 */
