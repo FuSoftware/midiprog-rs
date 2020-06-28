@@ -1,4 +1,4 @@
-use super::midicommand::MidiCommand;
+use super::midi_command::MidiCommand;
 
 pub struct Synth {
     pub name: String,

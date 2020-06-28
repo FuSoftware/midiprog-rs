@@ -9,7 +9,8 @@ edition = "2018"
 [dependencies]
 lazy_static = "1"
 regex = "1"
-midir = "0.6.1"
+midir = "0.6"
+rustyline = "6.2"
 
 #[profile.release]
 #panic = 'abort'

@@ -149,7 +149,6 @@ impl CommandParser {
             let is_numbered: bool = cap.get(1).unwrap().as_str().starts_with("@");
             let mut p = String::from(cap.get(1).unwrap().as_str());
 
-
             if is_numbered {
                 if !count.contains_key(&p) {
                     count.insert(p.clone(), 0);

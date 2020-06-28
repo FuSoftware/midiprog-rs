@@ -1,6 +1,9 @@
 pub struct MidiInterface {
     in_conn: Option<midir::MidiInputConnection<()>>,
     out_conn: Option<midir::MidiOutputConnection>,
+
+    in_port: usize,
+    out_port: usize,
 }
 
 impl MidiInterface {
@@ -8,10 +11,12 @@ impl MidiInterface {
         MidiInterface {
             in_conn: None,
             out_conn: None,
+            in_port: 0,
+            out_port: 0,
         }
     }
 
-    pub fn set_ports(&mut self, midi_in: usize, midi_out: usize) {
+    pub fn set_input_port(&mut self, midi_in: usize) {
         let in_m = midir::MidiInput::new("midi-prog").unwrap();
         let in_ports = in_m.ports();
         self.in_conn = Some(
@@ -19,18 +24,27 @@ impl MidiInterface {
                 in_ports.get(midi_in).unwrap(),
                 "midi-in",
                 |stamp, message, _| {
-                    println!("{}: {:?} (len = {})", stamp, message, message.len());
+                    //println!("{}: {:?} (len = {})", stamp, message, message.len());
                 },
                 (),
             )
             .expect("Connection to input port failed"),
         );
+    }
 
+    pub fn set_output_port(&mut self, midi_out: usize) {
         let out_m = midir::MidiOutput::new("midi-prog").unwrap();
         let out_ports = out_m.ports();
-        self.out_conn = Some(out_m
-            .connect(out_ports.get(midi_out).unwrap(), "midi-out")
-            .expect("Connection to output port failed"));
+        self.out_conn = Some(
+            out_m
+                .connect(out_ports.get(midi_out).unwrap(), "midi-out")
+                .expect("Connection to output port failed"),
+        );
+    }
+
+    pub fn set_ports(&mut self, midi_in: usize, midi_out: usize) {
+        self.set_input_port(midi_in);
+        self.set_output_port(midi_out);
     }
 
     pub fn list_input_ports() {

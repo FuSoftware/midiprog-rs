@@ -1,5 +1,6 @@
 use super::utils::*;
 
+#[derive(Debug, Clone)]
 pub struct MidiParameter {
     key: String,
     size: f32,
@@ -12,13 +13,23 @@ impl MidiParameter {
     }
 
     pub fn new_str(key: &str, size: f32, name: &str) -> MidiParameter {
-        MidiParameter { key: key.to_owned(), size: size, name: name.to_owned() }
+        MidiParameter {
+            key: key.to_owned(),
+            size: size,
+            name: name.to_owned(),
+        }
     }
 
     pub fn new_parse(data: &str) -> MidiParameter {
         let tokens: Vec<&str> = data.split(':').collect();
         let trimmed = tokens.iter().map(|&x| x.trim()).collect::<Vec<_>>();
-        MidiParameter::new_str(trimmed[0], trimmed[1].parse::<f32>().expect("Failed to parse parameter size"), trimmed[2])
+        MidiParameter::new_str(
+            trimmed[0],
+            trimmed[1]
+                .parse::<f32>()
+                .expect("Failed to parse parameter size"),
+            trimmed[2],
+        )
     }
 
     pub fn characters(&self) -> usize {
@@ -34,6 +45,7 @@ impl MidiParameter {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct MidiCommand {
     pub name: String,
     pub midi: String,

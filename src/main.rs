@@ -2,6 +2,7 @@
 extern crate lazy_static;
 extern crate midir;
 extern crate regex;
+extern crate rustyline;
 
 mod lib;
 
@@ -16,14 +17,16 @@ mod tests {
 
     #[test]
     fn test_param_half_byte() {
-        let p: lib::midicommand::MidiParameter = lib::midicommand::MidiParameter::new_str("n", 0.5, "Channel");
+        let p: lib::midi_command::MidiParameter =
+            lib::midi_command::MidiParameter::new_str("n", 0.5, "Channel");
         assert_eq!(p.characters(), 1);
         assert_eq!(p.midi(10), "a");
     }
 
     #[test]
     fn test_param_full_byte() {
-        let p: lib::midicommand::MidiParameter = lib::midicommand::MidiParameter::new_str("n", 1.0, "Channel");
+        let p: lib::midi_command::MidiParameter =
+            lib::midi_command::MidiParameter::new_str("n", 1.0, "Channel");
         assert_eq!(p.characters(), 2);
         assert_eq!(p.midi(10), "0a");
         assert_eq!(p.midi(254), "fe");
@@ -31,12 +34,14 @@ mod tests {
 
     #[test]
     fn test_command() {
-        let n: lib::midicommand::MidiParameter = lib::midicommand::MidiParameter::new_str("n", 0.5, "Channel");
-        let p: lib::midicommand::MidiParameter =
-            lib::midicommand::MidiParameter::new_str("p", 1.0, "Parameter");
-        let v: lib::midicommand::MidiParameter = lib::midicommand::MidiParameter::new_str("v", 1.0, "Value");
-        let mut m: lib::midicommand::MidiCommand =
-            lib::midicommand::MidiCommand::new("Parameter Change".to_owned());
+        let n: lib::midi_command::MidiParameter =
+            lib::midi_command::MidiParameter::new_str("n", 0.5, "Channel");
+        let p: lib::midi_command::MidiParameter =
+            lib::midi_command::MidiParameter::new_str("p", 1.0, "Parameter");
+        let v: lib::midi_command::MidiParameter =
+            lib::midi_command::MidiParameter::new_str("v", 1.0, "Value");
+        let mut m: lib::midi_command::MidiCommand =
+            lib::midi_command::MidiCommand::new("Parameter Change".to_owned());
         m.midi = String::from("F0 0n p v F7");
         m.add_parameter(n);
         m.add_parameter(p);
@@ -65,7 +70,10 @@ mod tests {
 
     #[test]
     fn test_config() {
-        let cs = lib::command_parser::CommandParser::parse_command(String::from("synth -id \"ju-2\" -name \"Juno-2\" -manufacturer \"Roland\"")).unwrap();
+        let cs = lib::command_parser::CommandParser::parse_command(String::from(
+            "synth -id \"ju-2\" -name \"Juno-2\" -manufacturer \"Roland\"",
+        ))
+        .unwrap();
         let cc = lib::command_parser::CommandParser::parse_command(String::from("command -name \"Program Parameter Request\" -midi \"F0 42 3n 0B 10 p F7\" -@parameter \"n : 0.5 : Channel\" -@parameter \"p : 1 : Parameter\" -alias \"pr\"")).unwrap();
         let cp = lib::command_parser::CommandParser::parse_command(String::from("command -name \"Program Parameter Change\" -midi \"F0 41 3n 0B 10 p v F7\" -@parameter \"n : 0.5 : Channel\" -@parameter \"p : 1 : Parameter\" -@parameter \"v : 1 : Value\" -alias \"pc param-change\"")).unwrap();
         let mut conf = lib::config::Config::new();
@@ -107,6 +115,12 @@ mod tests {
     }
 }
 
+fn interactive_interpreter() {
+    let mut i = lib::interpreter::Interpreter::new();
+    i.run_command_str("source /home/fuguet/prog/rs/midiprog-rs/data/midirc.cmd".to_owned());
+    i.repl();
+}
+
 fn main() {
-    println!("Hello, world!");
+    interactive_interpreter();
 }
