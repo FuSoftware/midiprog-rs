@@ -1,9 +1,14 @@
+use derive_more::{From};
+#[derive(From)]
+pub enum MidiInterfaceError {
+    ConnectErrorMidiInput(midir::ConnectError<midir::MidiInput>),
+    ConnectErrorMidiOutput(midir::ConnectError<midir::MidiOutput>),
+    PortDoesNotExist(String)
+}
+
 pub struct MidiInterface {
     in_conn: Option<midir::MidiInputConnection<()>>,
     out_conn: Option<midir::MidiOutputConnection>,
-
-    in_port: usize,
-    out_port: usize,
 }
 
 impl MidiInterface {
@@ -11,40 +16,48 @@ impl MidiInterface {
         MidiInterface {
             in_conn: None,
             out_conn: None,
-            in_port: 0,
-            out_port: 0,
         }
     }
 
-    pub fn set_input_port(&mut self, midi_in: usize) {
+    pub fn set_input_port(&mut self, midi_in: usize) -> Result<(), MidiInterfaceError> {
         let in_m = midir::MidiInput::new("midi-prog").unwrap();
         let in_ports = in_m.ports();
-        self.in_conn = Some(
-            in_m.connect(
-                in_ports.get(midi_in).unwrap(),
-                "midi-in",
-                |stamp, message, _| {
-                    //println!("{}: {:?} (len = {})", stamp, message, message.len());
-                },
-                (),
-            )
-            .expect("Connection to input port failed"),
-        );
+        if let Some(p) = in_ports.get(midi_in) {
+            self.in_conn = Some(
+                in_m.connect(
+                    p,
+                    "midi-in",
+                    |_stamp, _message, _| {
+                        //println!("{}: {:?} (len = {})", stamp, message, message.len());
+                    },
+                    (),
+                )?
+            );
+            Ok(())
+        } else {
+            Err(MidiInterfaceError::PortDoesNotExist(format!("MIDI input port {} doesn't exist", midi_in)))
+        }
     }
 
-    pub fn set_output_port(&mut self, midi_out: usize) {
+    pub fn set_output_port(&mut self, midi_out: usize) -> Result<(), MidiInterfaceError> {
         let out_m = midir::MidiOutput::new("midi-prog").unwrap();
         let out_ports = out_m.ports();
-        self.out_conn = Some(
-            out_m
-                .connect(out_ports.get(midi_out).unwrap(), "midi-out")
-                .expect("Connection to output port failed"),
-        );
+        if let Some(p) = out_ports.get(midi_out) {
+            self.out_conn = Some(
+                out_m
+                    .connect(p, "midi-out")?
+            );
+            Ok(())
+        } else {
+            Err(MidiInterfaceError::PortDoesNotExist(format!("MIDI output port {} doesn't exist", midi_out)))
+        }
+        
     }
 
-    pub fn set_ports(&mut self, midi_in: usize, midi_out: usize) {
-        self.set_input_port(midi_in);
-        self.set_output_port(midi_out);
+    pub fn set_ports(&mut self, midi_in: usize, midi_out: usize) -> Result<(), MidiInterfaceError> {
+        self.set_input_port(midi_in)?;
+        self.set_output_port(midi_out)?;
+        Ok(())
     }
 
     pub fn list_input_ports() {

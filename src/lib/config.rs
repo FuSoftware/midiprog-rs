@@ -3,6 +3,7 @@ use super::midi_command::*;
 use super::synth::Synth;
 use std::collections::HashMap;
 use std::fs::File;
+use std::io::prelude::*;
 
 pub struct Config {
     synths: HashMap<String, Synth>,
@@ -21,20 +22,57 @@ impl Config {
         }
     }
 
-    pub fn run_file(&mut self, path: &str) {
-        match File::open(path) {
-            Ok(file) => {
-                let mut contents: String = String::new();
-                file.read_to_string(&mut contents);
-                let parsed = json::parse(contents);
-                /*
-                let commands = CommandParser::parse_commands_file(file);
-                self.run_commands(&commands);
-                */
-            }
+    pub fn run_file(&mut self, path: &str) -> std::io::Result<()> {
+        let mut file = File::open(path)?;
+        let mut contents: String = String::new();
+        file.read_to_string(&mut contents)?;
+        self.run_json(contents);
+        
+        /*
+        let commands = CommandParser::parse_commands_file(file);
+        self.run_commands(&commands);
+        */
+        Ok(())
+    }
 
-            Err(E) => println!("Failed to read file {} : {}", path, E.to_string()),
+    pub fn run_json(&mut self, contents: String) {
+        match json::parse(&contents) {
+            Ok(parsed) => {
+                self.create_synth_json(parsed);
+            } 
+            
+            Err(e) => println!("Failed to parse JSON file : {}", e.to_string()),
         }
+    }
+
+    pub fn create_synth_json(&mut self, val: json::JsonValue) {
+        let id = val["id"].as_str().unwrap();
+        let mut synth = Synth::from_id(id.to_string());
+
+        if let Some(name) = val["name"].as_str() {
+            synth.name = name.to_string();
+        }
+
+        if let Some(manufacturer) = val["manufacturer"].as_str() {
+            synth.manufacturer = manufacturer.to_string();
+        }
+
+        // Commands
+        for c_val in val["commands"].members() {
+            let mut c = MidiCommand::new(c_val["name"].as_str().unwrap().to_owned());
+            c.midi = c_val["midi"].as_str().unwrap().to_owned();
+            c.add_aliases(c_val["alias"].as_str().unwrap().to_owned());
+
+            for param_val in c_val["parameters"].members() {
+                c.add_parameter(MidiParameter::new_parse(
+                    param_val.as_str().unwrap()
+                ));
+            }
+            synth.commands.push(c);
+        }
+
+        self.current_synth = id.to_string();
+        self.synths.insert(id.to_string(), synth);
     }
 
     pub fn run_commands_str<T: AsRef<str>>(&mut self, content: &[T]) {
@@ -179,25 +217,9 @@ impl Config {
 
     pub fn get_synth_list(&self) -> Vec<&str> {
         let mut v: Vec<&str> = Vec::new();
-        for (k, s) in &self.synths {
+        for (k, _s) in &self.synths {
             v.push(k.as_str());
         }
         return v;
     }
 }
-
-/*
-void Config::report_parameter_number_error(std::string command, size_t number, size_t found)
-{
-    std::cout << "Expected '" << number << "' parameters for the '" << command << "' command. Found '" << found << "'" << std::endl;
-}
-
-std::vector<std::string> Config::get_synth_list()
-{
-    std::vector<std::string> keys;
-    for(auto it = this->synths.begin(); it != this->synths.end(); ++it) {
-        keys.push_back(it->first);
-    }
-    return keys;
-}
-*/

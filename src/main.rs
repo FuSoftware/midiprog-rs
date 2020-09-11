@@ -5,6 +5,7 @@ extern crate lazy_static;
 extern crate midir;
 extern crate regex;
 extern crate rustyline;
+extern crate derive_more;
 
 mod lib;
 
@@ -100,13 +101,57 @@ mod tests {
         let mut conf = lib::config::Config::new();
 
         conf.run_commands_str(&vec![
-            "synth -id \"ju-2\" -name \"Juno-2\" -manufacturer \"Roland\"",
+            "synth -id \"ju-2\" -name \"Alpha Juno-2\" -manufacturer \"Roland\"",
             "command -name \"Program Parameter Request\" -midi \"F0 42 3n 0B 10 p F7\" -@parameter \"n : 0.5 : Channel\" -@parameter \"p : 1 : Parameter\" -alias \"pr\"",
             "command -name \"Program Parameter Change\" -midi \"F0 41 3n 0B 10 p v F7\" -@parameter \"n : 0.5 : Channel\" -@parameter \"p : 1 : Parameter\" -@parameter \"v : 1 : Value\" -alias \"pc param-change\""
         ]);
 
         let s: &lib::synth::Synth = conf.get_current_synth().expect("No synth loaded");
-        assert_eq!(s.name, "Juno-2");
+        assert_eq!(s.name, "Alpha Juno-2");
+        assert_eq!(s.id, "ju-2");
+        assert_eq!(s.manufacturer, "Roland");
+        assert!(s.has_command("pr"));
+        assert!(s.has_command("Program Parameter Request"));
+        assert!(s.has_command("pc"));
+        assert!(s.has_command("param-change"));
+        assert!(s.has_command("Program Parameter Change"));
+    }
+
+    #[test]
+    fn test_config_json_parser() {
+        let mut conf = lib::config::Config::new();
+
+        conf.run_json(r#"
+        {
+            "id" : "ju-2",
+            "manufacturer" : "Roland",
+            "name" : "Alpha Juno-2",
+            "commands" : [
+                {
+                    "name" : "Program Parameter Request",
+                    "midi" : "F0 42 3n 0B 10 p F7",
+                    "parameters" : [
+                        "n : 0.5 : Channel",
+                        "p : 1 : Parameter"
+                    ],
+                    "alias" : "pr"
+                },
+                {
+                    "name" : "Program Parameter Change",
+                    "midi" : "F0 41 3n 0B 10 p v F7",
+                    "parameters" : [
+                        "n : 0.5 : Channel",
+                        "p : 1 : Parameter",
+                        "v : 1 : Value"
+                    ],
+                    "alias" : "pc param-change"
+                }
+            ]
+        }
+        "#.to_owned());
+
+        let s: &lib::synth::Synth = conf.get_current_synth().expect("No synth loaded");
+        assert_eq!(s.name, "Alpha Juno-2");
         assert_eq!(s.id, "ju-2");
         assert_eq!(s.manufacturer, "Roland");
         assert!(s.has_command("pr"));
@@ -119,7 +164,7 @@ mod tests {
 
 fn interactive_interpreter() {
     let mut i = lib::interpreter::Interpreter::new();
-    i.run_command_str("source /home/fuguet/prog/rs/midiprog-rs/data/midirc.cmd".to_owned());
+    i.run_command_str("source data/midirc.cmd".to_owned());
     i.repl();
 }
 

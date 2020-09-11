@@ -205,7 +205,7 @@ impl Interpreter {
                 },
 
                 _ => {
-                    println!("Expected command name, got empty command");
+                    println!("Command {} does not exist", command);
                 }
             },
 
