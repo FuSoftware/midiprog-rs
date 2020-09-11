@@ -24,8 +24,13 @@ impl Config {
     pub fn run_file(&mut self, path: &str) {
         match File::open(path) {
             Ok(file) => {
+                let mut contents: String = String::new();
+                file.read_to_string(&mut contents);
+                let parsed = json::parse(contents);
+                /*
                 let commands = CommandParser::parse_commands_file(file);
                 self.run_commands(&commands);
+                */
             }
 
             Err(E) => println!("Failed to read file {} : {}", path, E.to_string()),

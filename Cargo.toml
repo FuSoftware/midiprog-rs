@@ -11,6 +11,7 @@ lazy_static = "1"
 regex = "1"
 midir = "0.6"
 rustyline = "6.2"
+json = "*"
 
 #[profile.release]
 #panic = 'abort'
