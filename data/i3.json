@@ -1,0 +1,71 @@
+{
+    "id" : "i3",
+    "manufacturer" : "Korg",
+    "name" : "i3",
+    "commands" : [
+        {
+            "name" : "Mode Request",
+            "midi" : "F0 42 3n 39 12 F7",
+            "parameters" : [
+                "n : 0.5 : Channel"
+            ],
+            "alias" : "mode-request"
+        },
+        {
+            "name" : "Program Parameter Dump Request",
+            "midi" : "F0 42 3n 39 10 F7",
+            "parameters" : [
+                "n : 0.5 : Channel"
+            ],
+            "alias" : "prg-dump"
+        },
+        {
+            "name" : "All Program Parameter Dump Request",
+            "midi" : "F0 42 3n 39 1C F7",
+            "parameters" : [
+                "n : 0.5 : Channel"
+            ],
+            "alias" : "all-prg-dump"
+        },
+        {
+            "name" : "All Arrangement Parameter Dump Request",
+            "midi" : "F0 42 3n 39 30 F7",
+            "parameters" : [
+                "n : 0.5 : Channel"
+            ],
+            "alias" : "all-arr-dump"
+        },
+        {
+            "name" : "All Style Parameter Dump Request",
+            "midi" : "F0 42 3n 39 31 F7",
+            "parameters" : [
+                "n : 0.5 : Channel"
+            ],
+            "alias" : "all-sty-dump"
+        },
+        {
+            "name" : "All Song Data Dump Request",
+            "midi" : "F0 42 3n 39 18 F7",
+            "parameters" : [
+                "n : 0.5 : Channel"
+            ],
+            "alias" : "all-sng-dump"
+        },
+        {
+            "name" : "All Backing Sequence Data Dump Request",
+            "midi" : "F0 42 3n 39 32 F7",
+            "parameters" : [
+                "n : 0.5 : Channel"
+            ],
+            "alias" : "all-seq-dump"
+        },
+        {
+            "name" : "Global Data Dump Request",
+            "midi" : "F0 42 3n 39 0E F7",
+            "parameters" : [
+                "n : 0.5 : Channel"
+            ],
+            "alias" : "global-dump"
+        }
+    ]
+}
