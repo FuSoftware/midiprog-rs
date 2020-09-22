@@ -35,14 +35,10 @@ impl Config {
         Ok(())
     }
 
-    pub fn run_json(&mut self, contents: String) {
-        match json::parse(&contents) {
-            Ok(parsed) => {
-                self.create_synth_json(parsed);
-            } 
-            
-            Err(e) => println!("Failed to parse JSON file : {}", e.to_string()),
-        }
+    pub fn run_json(&mut self, contents: String) -> Result<(), json::Error> {
+        let parsed = json::parse(&contents)?;
+        self.create_synth_json(parsed);
+        Ok(())
     }
 
     pub fn create_synth_json(&mut self, val: json::JsonValue) {

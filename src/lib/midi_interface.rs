@@ -1,4 +1,4 @@
-use derive_more::{From};
+use derive_more::*;
 #[derive(From)]
 pub enum MidiInterfaceError {
     ConnectErrorMidiInput(midir::ConnectError<midir::MidiInput>),
@@ -19,7 +19,7 @@ impl MidiInterface {
         }
     }
 
-    pub fn set_input_port(&mut self, midi_in: usize) -> Result<(), MidiInterfaceError> {
+    pub fn set_input_port(&mut self, midi_in: usize, callback: fn(u64, &[u8]) ) -> Result<(), MidiInterfaceError>  {
         let in_m = midir::MidiInput::new("midi-prog").unwrap();
         let in_ports = in_m.ports();
         if let Some(p) = in_ports.get(midi_in) {
@@ -27,8 +27,8 @@ impl MidiInterface {
                 in_m.connect(
                     p,
                     "midi-in",
-                    |_stamp, _message, _| {
-                        //println!("{}: {:?} (len = {})", stamp, message, message.len());
+                    move |stamp, message, _| {
+                        callback(stamp, message);
                     },
                     (),
                 )?
@@ -54,8 +54,8 @@ impl MidiInterface {
         
     }
 
-    pub fn set_ports(&mut self, midi_in: usize, midi_out: usize) -> Result<(), MidiInterfaceError> {
-        self.set_input_port(midi_in)?;
+    pub fn set_ports(&mut self, midi_in: usize, midi_out: usize, callback: fn(u64, &[u8])) -> Result<(), MidiInterfaceError> {
+        self.set_input_port(midi_in, callback)?;
         self.set_output_port(midi_out)?;
         Ok(())
     }

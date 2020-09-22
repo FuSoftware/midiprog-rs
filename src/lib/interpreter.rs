@@ -9,6 +9,14 @@ use rustyline::Editor;
 use std::fs::File;
 use std::io::prelude::*;
 
+use derive_more::*;
+#[derive(From)]
+pub enum InterpreterError {
+    SimpleError(String),
+    MidiSendError(midir::SendError),
+    InterfaceError(MidiInterfaceError)
+}
+
 pub enum InterpreterCommand {
     Interactive,
     Config(String),
@@ -217,24 +225,27 @@ impl Interpreter {
         None
     }
 
-    pub fn run_commands_str(&mut self, commands: &[String]) {
+    pub fn run_commands_str(&mut self, commands: &[String]) -> Result<(), InterpreterError> {
         for command in commands {
             if let Some(c) = self.parse_command(String::from(command.as_str())) {
-                self.run_command(c);
+                self.run_command(c)?;
             }
         }
+        Ok(())
     }
 
-    pub fn run_command_str(&mut self, command: String) {
-        if let Some(c) = self.parse_command(String::from(command.as_str())) {
-            self.run_command(c);
-        }
+    pub fn run_command_str(&mut self, command: String) -> Result<(), InterpreterError> {
+        let c = self.parse_command(String::from(command.as_str()))
+            .ok_or(InterpreterError::SimpleError(format!("Failed to parse command")))?;
+        self.run_command(c)?;
+        Ok(())
     }
 
-    pub fn run_command(&mut self, command: InterpreterCommand) {
+    pub fn run_command(&mut self, command: InterpreterCommand) -> Result<(), InterpreterError> {
         match command {
             InterpreterCommand::Interactive => {
                 self.repl();
+                Ok(())
             }
 
             InterpreterCommand::Source(file) => {
@@ -249,59 +260,74 @@ impl Interpreter {
                     }
 
                     Err(E) => {
-                        println!("Error sourcing file {} : {}", file.as_str(), E.to_string());
+                        return Err(InterpreterError::SimpleError(format!("Error sourcing file {} : {}", file.as_str(), E.to_string())));
                     }
                 }
-                self.run_file(file)
+                self.run_file(file);
+                Ok(())
             }
 
             InterpreterCommand::Config(file) => {
-                self.config.run_file(file.as_str());
+                match self.config.run_file(file.as_str()) {
+                    Ok(_a) => {
+
+                    }
+
+                    Err(_e) => {
+                        return Err(InterpreterError::SimpleError(format!("Error loading config file")));
+                    }
+                };
+                Ok(())
             }
 
             InterpreterCommand::Synth(id) => {
                 if self.config.has_synth(id.as_str()) {
-                    if let Some(sysex) = self.config.load_synth(id.as_str()) {
-                        self.sysex = sysex;
-                    }
+                    let sysex = self.config.load_synth(id.as_str()).ok_or(InterpreterError::SimpleError(format!("Failed to load synth {} sysex configuration", id)))?; 
+                    self.sysex = sysex;
+                    Ok(())
                 } else {
-                    println!("Failed to load synth {} configuration", id);
+                    Err(InterpreterError::SimpleError(format!("Synth {} was not found", id)))
                 }
             }
 
             InterpreterCommand::MidiConfig(file) => {
                 self.config.run_file(file.as_str());
-
                 if self.config.has_synth("midi") {
-                    if let Some(midi) = self.config.load_synth("midi") {
-                        self.midi = midi;
-                    }
+                    let midi = self.config.load_synth("midi").ok_or(InterpreterError::SimpleError(format!("Failed to load MIDI standard")))?; 
+                    self.midi = midi;
+                    Ok(())
                 } else {
-                    println!("Failed to load MIDI configuration");
+                    Err(InterpreterError::SimpleError(format!("MIDI standard configuration was not found")))
                 }
             }
 
             InterpreterCommand::Port(midi_in, midi_out) => {
-                self.interface.set_input_port(midi_in);
+                self.interface.set_input_port(midi_in, |_stamp, _message|{})?;
 
                 if !midi_out.is_none() {
-                    self.interface.set_output_port(midi_out.unwrap());
+                    self.interface.set_output_port(midi_out.unwrap())?;
                 }
+                Ok(())
             }
 
             InterpreterCommand::PortList => {
                 MidiInterface::list_input_ports();
                 MidiInterface::list_output_ports();
+                Ok(())
             }
 
             InterpreterCommand::Channel(channel) => {
                 self.channel = channel;
+                Ok(())
             }
 
-            InterpreterCommand::Receive(timeout) => {}
+            InterpreterCommand::Receive(timeout) => {
+                Ok(())
+            }
 
             InterpreterCommand::Send(bytes) => {
-                self.interface.send_midi(&bytes);
+                self.interface.send_midi(&bytes)?;
+                Ok(())
             }
 
             InterpreterCommand::Sysex(command, mut data) => {
@@ -315,10 +341,11 @@ impl Interpreter {
                         .get(command.as_str())
                         .unwrap()
                         .generate_bytes(&data);
-                    self.interface.send_midi(&data);
+                    self.interface.send_midi(&data)?;
                     println!("Send SYSEX {} with data {:?}", command, data);
+                    Ok(())
                 } else {
-                    println!("SYSEX command '{}' not found", command);
+                    Err(InterpreterError::SimpleError(format!("SYSEX command {} not found", command)))
                 }
             }
 
@@ -333,10 +360,11 @@ impl Interpreter {
                         .get(command.as_str())
                         .unwrap()
                         .generate_bytes(&data);
-                    self.interface.send_midi(&data);
+                    self.interface.send_midi(&data)?;
                     println!("Sent MIDI '{}' with data {:?}", command, data);
+                    Ok(())
                 } else {
-                    println!("MIDI command {} not found", command);
+                    Err(InterpreterError::SimpleError(format!("MIDI command {} not found", command)))
                 }
             }
 
@@ -345,8 +373,9 @@ impl Interpreter {
                     for (alias, command) in &self.midi {
                         println!("{} : {}", alias, command.name);
                     }
+                    Ok(())
                 } else {
-                    println!("No MIDI configuration loaded.")
+                    Err(InterpreterError::SimpleError(format!("No MIDI configuration loaded")))
                 }
             }
 
@@ -355,8 +384,9 @@ impl Interpreter {
                     for (alias, command) in &self.sysex {
                         println!("{} : {}", alias, command.name);
                     }
+                    Ok(())
                 } else {
-                    println!("No SYSEX configuration loaded.")
+                    Err(InterpreterError::SimpleError(format!("No SYSEX configuration loaded")))
                 }
             }
         }
