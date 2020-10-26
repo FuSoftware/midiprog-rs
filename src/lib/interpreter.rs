@@ -259,8 +259,8 @@ impl Interpreter {
                         }
                     }
 
-                    Err(E) => {
-                        return Err(InterpreterError::SimpleError(format!("Error sourcing file {} : {}", file.as_str(), E.to_string())));
+                    Err(e) => {
+                        return Err(InterpreterError::SimpleError(format!("Error sourcing file {} : {}", file.as_str(), e.to_string())));
                     }
                 }
                 self.run_file(file);
@@ -304,8 +304,8 @@ impl Interpreter {
             InterpreterCommand::Port(midi_in, midi_out) => {
                 self.interface.set_input_port(midi_in, |_stamp, _message|{})?;
 
-                if !midi_out.is_none() {
-                    self.interface.set_output_port(midi_out.unwrap())?;
+                if let Some(o) = midi_out {
+                    self.interface.set_output_port(o)?;
                 }
                 Ok(())
             }
@@ -335,12 +335,8 @@ impl Interpreter {
                     data.insert(0, self.channel as usize);
                 }
 
-                if self.sysex.contains_key(command.as_str()) {
-                    let data = self
-                        .sysex
-                        .get(command.as_str())
-                        .unwrap()
-                        .generate_bytes(&data);
+                if let Some(sysex) = self.sysex.get(command.as_str()) {
+                    let data = sysex.generate_bytes(&data);
                     self.interface.send_midi(&data)?;
                     println!("Send SYSEX {} with data {:?}", command, data);
                     Ok(())
@@ -354,14 +350,10 @@ impl Interpreter {
                     data.insert(0, self.channel as usize);
                 }
 
-                if self.midi.contains_key(command.as_str()) {
-                    let data = self
-                        .midi
-                        .get(command.as_str())
-                        .unwrap()
-                        .generate_bytes(&data);
+                if let Some(midi) = self.midi.get(command.as_str()) {
+                    let data = midi.generate_bytes(&data);
                     self.interface.send_midi(&data)?;
-                    println!("Sent MIDI '{}' with data {:?}", command, data);
+                    println!("Send MIDI {} with data {:?}", command, data);
                     Ok(())
                 } else {
                     Err(InterpreterError::SimpleError(format!("MIDI command {} not found", command)))

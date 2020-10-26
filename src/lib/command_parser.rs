@@ -124,8 +124,8 @@ impl CommandParser {
 
     pub fn parse_command(content: String) -> Option<Command> {
         lazy_static! {
-            static ref RE_PARAMS: Regex = Regex::new("-(\\S+) \"([^\"]+)\"").unwrap();
-            static ref RE_COMM: Regex = Regex::new("([^\"\\s]+)(\\s?+)-").unwrap();
+            static ref RE_PARAMS: Regex = Regex::new("-(\\S+) \"([^\"]+)\"").expect("Failed to create Regex for command params");
+            static ref RE_COMM: Regex = Regex::new("([^\"\\s]+)(\\s?+)-").expect("Failed to create Regex for command name");
         }
 
         let mut command: Command;

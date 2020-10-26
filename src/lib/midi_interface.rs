@@ -81,9 +81,4 @@ impl MidiInterface {
     pub fn send_midi(&mut self, data: &[u8]) -> Result<(), midir::SendError> {
         self.out_conn.as_mut().unwrap().send(data)
     }
-
-    pub fn receive_midi(&self) -> Vec<u8> {
-        let data: Vec<u8> = Vec::new();
-        return data;
-    }
 }
