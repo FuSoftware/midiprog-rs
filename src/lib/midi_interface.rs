@@ -1,9 +1,12 @@
 use derive_more::*;
+use midir::{InitError, PortInfoError};
 #[derive(From)]
 pub enum MidiInterfaceError {
     ConnectErrorMidiInput(midir::ConnectError<midir::MidiInput>),
     ConnectErrorMidiOutput(midir::ConnectError<midir::MidiOutput>),
-    PortDoesNotExist(String)
+    PortDoesNotExist(String),
+    PortInfoError(PortInfoError),
+    PortInitError(InitError)
 }
 
 pub struct MidiInterface {
@@ -60,22 +63,28 @@ impl MidiInterface {
         Ok(())
     }
 
-    pub fn list_input_ports() {
-        let midi_in: midir::MidiInput = midir::MidiInput::new("midi-prog").unwrap();
+    pub fn list_input_ports() -> Result<String, MidiInterfaceError> {
+        let midi_in: midir::MidiInput = midir::MidiInput::new("midi-prog")?;
 
-        println!("Available input ports:");
+        let mut s: String = String::new();
+        s.push_str("Available input ports:\n");
+
         for (i, p) in midi_in.ports().iter().enumerate() {
-            println!("{}: {}", i, midi_in.port_name(p).unwrap());
+            s.push_str(&format!("{}: {}\n", i, midi_in.port_name(p)?));
         }
+
+        Ok(s)
     }
 
-    pub fn list_output_ports() {
-        let midi_out: midir::MidiOutput = midir::MidiOutput::new("midi-prog").unwrap();
+    pub fn list_output_ports() -> Result<String, MidiInterfaceError> {
+        let midi_out: midir::MidiOutput = midir::MidiOutput::new("midi-prog")?;
 
-        println!("Available output ports:");
+        let mut s: String = String::new();
+        s.push_str("Available output ports:\n");
         for (i, p) in midi_out.ports().iter().enumerate() {
-            println!("{}: {}", i, midi_out.port_name(p).unwrap());
+            s.push_str(&format!("{}: {}\n", i, midi_out.port_name(p)?));
         }
+        Ok(s)
     }
 
     pub fn send_midi(&mut self, data: &[u8]) -> Result<(), midir::SendError> {

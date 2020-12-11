@@ -311,8 +311,8 @@ impl Interpreter {
             }
 
             InterpreterCommand::PortList => {
-                MidiInterface::list_input_ports();
-                MidiInterface::list_output_ports();
+                println!("{:?}", MidiInterface::list_input_ports().unwrap_or("Error listing the MIDI input ports".to_owned()));
+                println!("{:?}", MidiInterface::list_output_ports().unwrap_or("Error listing the MIDI output ports".to_owned()));
                 Ok(())
             }
 
