@@ -148,7 +148,7 @@ mod tests {
                 }
             ]
         }
-        "#.to_owned());
+        "#.to_owned()).unwrap();
 
         let s: &lib::synth::Synth = conf.get_current_synth().expect("No synth loaded");
         assert_eq!(s.name, "Alpha Juno-2");

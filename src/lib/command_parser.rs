@@ -4,6 +4,8 @@ use std::fmt;
 use std::fs::File;
 use std::io::prelude::*;
 
+use lazy_static::*;
+
 pub struct Command {
     pub name: String,
     pub parameters: std::collections::HashMap<String, String>,

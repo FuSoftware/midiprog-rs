@@ -19,3 +19,13 @@ derive_more = "*"
 #codegen-units = 1
 #lto = true
 #opt-level = 'z'  # Optimize for size.
+
+[lib]
+name = "midiprog"
+path = "src/lib_main.rs"
+bench = false
+
+[[bin]]
+name = "midiprog-bin"
+path = "src/bin_main.rs"
+bench = false
