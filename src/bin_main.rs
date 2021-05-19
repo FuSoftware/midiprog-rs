@@ -164,7 +164,7 @@ mod tests {
 
 fn interactive_interpreter() {
     let mut i = lib::interpreter::Interpreter::new();
-    i.run_command_str("source data/midirc.cmd".to_owned());
+    i.run_command_str("source data/midirc.cmd".to_owned()).unwrap();
     i.repl();
 }
 

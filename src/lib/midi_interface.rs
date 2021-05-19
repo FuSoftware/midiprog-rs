@@ -1,6 +1,6 @@
 use derive_more::*;
 use midir::{InitError, PortInfoError};
-#[derive(From)]
+#[derive(Debug, From)]
 pub enum MidiInterfaceError {
     ConnectErrorMidiInput(midir::ConnectError<midir::MidiInput>),
     ConnectErrorMidiOutput(midir::ConnectError<midir::MidiOutput>),
@@ -23,7 +23,7 @@ impl MidiInterface {
     }
 
     pub fn set_input_port(&mut self, midi_in: usize, callback: fn(u64, &[u8]) ) -> Result<(), MidiInterfaceError>  {
-        let in_m = midir::MidiInput::new("midi-prog").unwrap();
+        let in_m = midir::MidiInput::new("midi-prog")?;
         let in_ports = in_m.ports();
         if let Some(p) = in_ports.get(midi_in) {
             self.in_conn = Some(
@@ -43,7 +43,7 @@ impl MidiInterface {
     }
 
     pub fn set_output_port(&mut self, midi_out: usize) -> Result<(), MidiInterfaceError> {
-        let out_m = midir::MidiOutput::new("midi-prog").unwrap();
+        let out_m = midir::MidiOutput::new("midi-prog")?;
         let out_ports = out_m.ports();
         if let Some(p) = out_ports.get(midi_out) {
             self.out_conn = Some(

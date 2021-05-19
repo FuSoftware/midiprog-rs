@@ -5,6 +5,15 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
 
+use derive_more::*;
+
+#[derive(Debug, From)]
+pub enum ConfigError {
+    IOError(std::io::Error),
+    JsonError(json::Error),
+    CommonError(String)
+}
+
 pub struct Config {
     synths: HashMap<String, Synth>,
     aliases: HashMap<String, MidiCommand>,
@@ -22,11 +31,11 @@ impl Config {
         }
     }
 
-    pub fn run_file(&mut self, path: &str) -> std::io::Result<()> {
+    pub fn run_file(&mut self, path: &str) -> Result<(), ConfigError> {
         let mut file = File::open(path)?;
         let mut contents: String = String::new();
         file.read_to_string(&mut contents)?;
-        self.run_json(contents);
+        self.run_json(contents)?;
         
         /*
         let commands = CommandParser::parse_commands_file(file);
@@ -35,40 +44,46 @@ impl Config {
         Ok(())
     }
 
-    pub fn run_json(&mut self, contents: String) -> Result<(), json::Error> {
+    pub fn run_json(&mut self, contents: String) -> Result<(), ConfigError> {
         let parsed = json::parse(&contents)?;
-        self.create_synth_json(parsed);
+        self.create_synth_json(parsed)?;
         Ok(())
     }
 
-    pub fn create_synth_json(&mut self, val: json::JsonValue) {
-        let id = val["id"].as_str().unwrap();
-        let mut synth = Synth::from_id(id.to_string());
+    pub fn create_synth_json(&mut self, val: json::JsonValue) -> Result<(), ConfigError> {
+        if let Some(id) = val["id"].as_str() {
+            let mut synth = Synth::from_id(id.to_string());
 
-        if let Some(name) = val["name"].as_str() {
-            synth.name = name.to_string();
-        }
-
-        if let Some(manufacturer) = val["manufacturer"].as_str() {
-            synth.manufacturer = manufacturer.to_string();
-        }
-
-        // Commands
-        for c_val in val["commands"].members() {
-            let mut c = MidiCommand::new(c_val["name"].as_str().unwrap().to_owned());
-            c.midi = c_val["midi"].as_str().unwrap().to_owned();
-            c.add_aliases(c_val["alias"].as_str().unwrap().to_owned());
-
-            for param_val in c_val["parameters"].members() {
-                c.add_parameter(MidiParameter::new_parse(
-                    param_val.as_str().unwrap()
-                ));
+            if let Some(name) = val["name"].as_str() {
+                synth.name = name.to_string();
             }
-            synth.commands.push(c);
-        }
 
-        self.current_synth = id.to_string();
-        self.synths.insert(id.to_string(), synth);
+            if let Some(manufacturer) = val["manufacturer"].as_str() {
+                synth.manufacturer = manufacturer.to_string();
+            }
+
+            // Commands
+            for c_val in val["commands"].members() {
+                let mut c = MidiCommand::new(c_val["name"].as_str().unwrap().to_owned());
+                c.midi = c_val["midi"].as_str().unwrap().to_owned();
+                c.add_aliases(c_val["alias"].as_str().unwrap().to_owned());
+
+                for param_val in c_val["parameters"].members() {
+                    c.add_parameter(MidiParameter::new_parse(
+                        param_val.as_str().unwrap()
+                    ));
+                }
+                synth.commands.push(c);
+            }
+
+            self.current_synth = id.to_string();
+            self.synths.insert(id.to_string(), synth);
+
+            return Ok(());
+        } else {
+            return Err(ConfigError::CommonError("Failed to load synth id".to_owned()));
+        }
+        
     }
 
     pub fn run_commands_str<T: AsRef<str>>(&mut self, content: &[T]) {

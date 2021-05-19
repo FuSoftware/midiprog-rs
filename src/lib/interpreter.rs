@@ -10,7 +10,7 @@ use std::fs::File;
 use std::io::prelude::*;
 
 use derive_more::*;
-#[derive(From)]
+#[derive(Debug, From)]
 pub enum InterpreterError {
     SimpleError(String),
     MidiSendError(midir::SendError),
