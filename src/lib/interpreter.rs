@@ -235,8 +235,8 @@ impl Interpreter {
         Ok(())
     }
 
-    pub fn run_command_str(&mut self, command: String) -> Result<(), InterpreterError> {
-        let c = self.parse_command(String::from(command.as_str()))
+    pub fn run_command_str(&mut self, command: &str) -> Result<(), InterpreterError> {
+        let c = self.parse_command(String::from(command))
             .ok_or(InterpreterError::SimpleError(format!("Failed to parse command")))?;
         self.run_command(c)?;
         Ok(())
@@ -256,7 +256,7 @@ impl Interpreter {
                         file.read_to_string(&mut contents);
                         let commands = contents.split('\n');
                         for command in commands {
-                            self.run_command_str(command.trim().to_owned());
+                            self.run_command_str(command.trim());
                         }
                     }
 
@@ -405,7 +405,7 @@ impl Interpreter {
                         _ => {
                             let commands = line.split("|");
                             for command in commands {
-                                self.run_command_str(String::from(command));
+                                self.run_command_str(command);
                             }
                         }
                     }
