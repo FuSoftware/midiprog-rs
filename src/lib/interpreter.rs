@@ -17,6 +17,25 @@ pub enum InterpreterError {
     InterfaceError(MidiInterfaceError)
 }
 
+impl std::fmt::Display for InterpreterError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+
+        return match self {
+            InterpreterError::SimpleError(e) => {
+                write!(f, "{}", e)
+            }
+
+            InterpreterError::MidiSendError(e) => {
+                write!(f, "{}", e)
+            }
+
+            InterpreterError::InterfaceError(e) => {
+                write!(f, "{}", e)
+            }
+        }
+    }
+}
+
 pub enum InterpreterCommand {
     Interactive,
     Config(String),
