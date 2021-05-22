@@ -34,6 +34,7 @@ pub enum InterpreterCommand {
     Source(String),
 }
 
+#[derive(Default)]
 pub struct Interpreter {
     channel: i8,
     config: Config,

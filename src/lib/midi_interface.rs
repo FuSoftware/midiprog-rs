@@ -9,6 +9,7 @@ pub enum MidiInterfaceError {
     PortInitError(InitError)
 }
 
+#[derive(Default)]
 pub struct MidiInterface {
     in_conn: Option<midir::MidiInputConnection<()>>,
     out_conn: Option<midir::MidiOutputConnection>,

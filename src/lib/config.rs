@@ -14,6 +14,7 @@ pub enum ConfigError {
     CommonError(String)
 }
 
+#[derive(Default)]
 pub struct Config {
     synths: HashMap<String, Synth>,
     aliases: HashMap<String, MidiCommand>,
