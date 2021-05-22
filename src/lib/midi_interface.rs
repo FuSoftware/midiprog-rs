@@ -1,5 +1,7 @@
 use derive_more::*;
 use midir::{InitError, PortInfoError};
+use std::fmt;
+
 #[derive(Debug, From)]
 pub enum MidiInterfaceError {
     ConnectErrorMidiInput(midir::ConnectError<midir::MidiInput>),
@@ -7,6 +9,33 @@ pub enum MidiInterfaceError {
     PortDoesNotExist(String),
     PortInfoError(PortInfoError),
     PortInitError(InitError)
+}
+
+impl std::fmt::Display for MidiInterfaceError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+
+        return match self {
+            MidiInterfaceError::ConnectErrorMidiInput(e) => {
+                write!(f, "{}", e)
+            }
+
+            MidiInterfaceError::ConnectErrorMidiOutput(e) => {
+                write!(f, "{}", e)
+            }
+
+            MidiInterfaceError::PortDoesNotExist(e) => {
+                write!(f, "{}", e)
+            }
+
+            MidiInterfaceError::PortInfoError(e) => {
+                write!(f, "{}", e)
+            }
+
+            MidiInterfaceError::PortInitError(e) => {
+                write!(f, "{}", e)
+            }
+        }
+    }
 }
 
 #[derive(Default)]
