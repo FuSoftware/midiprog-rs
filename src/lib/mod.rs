@@ -5,3 +5,4 @@ pub mod midi_command;
 pub mod midi_interface;
 pub mod synth;
 pub mod utils;
+pub mod midi_parser;

@@ -1,5 +1,5 @@
 midiconfig data/midi.json
-config data/dw-8000.json
-synth dw-8000
-port 1 1
+config data/ju-2.json
+synth ju-2
+port 0 1
 channel 0

@@ -322,7 +322,9 @@ impl Interpreter {
             }
 
             InterpreterCommand::Port(midi_in, midi_out) => {
-                self.interface.set_input_port(midi_in, |_stamp, _message|{})?;
+                self.interface.set_input_port(midi_in, |_stamp, message|{
+                    println!("{:?}", message);
+                })?;
 
                 if let Some(o) = midi_out {
                     self.interface.set_output_port(o)?;
