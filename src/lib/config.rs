@@ -216,7 +216,7 @@ impl Config {
     }
 
     pub fn get_all_midi_commands(&self) -> Vec<MidiCommand> {
-        let v : Vec<MidiCommand> = Vec::new();
+        let mut v : Vec<MidiCommand> = Vec::new();
 
         for (id, synth) in &self.synths {
             for c in &synth.commands {
