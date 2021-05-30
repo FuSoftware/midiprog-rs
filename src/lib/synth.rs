@@ -35,4 +35,14 @@ impl Synth {
         }
         return false;
     }
+
+    pub fn get_command(&self, id: &str) -> Option<MidiCommand> {
+        for c in &self.commands {
+            if c.aliases.contains(&id.to_owned()) {
+                return Some(c.clone());
+            }
+        }
+
+        return None;
+    }
 }

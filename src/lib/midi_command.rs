@@ -52,6 +52,8 @@ pub struct MidiCommand {
     pub parameters: std::collections::HashMap<String, MidiParameter>,
     pub parameter_names: Vec<String>,
     pub aliases: Vec<String>,
+    pub mask: Vec<u8>,
+    pub masked_val: Vec<u8>
 }
 
 impl MidiCommand {
@@ -62,7 +64,26 @@ impl MidiCommand {
             parameters: std::collections::HashMap::<String, MidiParameter>::new(),
             parameter_names: Vec::new(),
             aliases: Vec::new(),
+            mask: Vec::new(),
+            masked_val: Vec::new(),
         }
+    }
+
+    pub fn from_json(val: &json::JsonValue) -> MidiCommand {
+        let mut c = MidiCommand::new(val["name"].as_str().unwrap().to_owned());
+        c.midi = val["midi"].as_str().unwrap().to_owned();
+        c.add_aliases(val["alias"].as_str().unwrap().to_owned());
+
+        for param_val in val["parameters"].members() {
+            c.add_parameter(MidiParameter::new_parse(
+                param_val.as_str().unwrap()
+            ));
+        }
+
+        c.mask = MidiCommand::maskify(&c.midi);
+        c.masked_val = MidiCommand::destringify(&c.midi);
+
+        return c;
     }
 
     pub fn generate(&self, values: &[usize]) -> String {
@@ -118,5 +139,76 @@ impl MidiCommand {
         for s in values {
             self.aliases.push(s.trim().to_owned())
         }
+    }
+
+    pub fn destringify(code: &str) -> Vec<u8> {
+        let s = code.replace(" ", "");
+        let mut data: Vec<u8> = Vec::new();
+
+        let mut b = false;
+        let mut x = 0;
+
+        for c in s.chars() {
+            if "0123456789".contains(c) {
+                x += (0xF) << if b {0} else {4};
+            }
+
+            if "ABCDEF".contains(c) {
+                x += (0xF) << if b {0} else {4};
+            }
+
+            b = !b;
+
+            if !b {
+                data.push(x);
+                x = 0;
+            }
+        }
+
+        return data;
+    }
+
+    pub fn maskify(code: &str) -> Vec<u8> {
+        let s = code.replace(" ", "");
+        let mut data: Vec<u8> = Vec::new();
+
+        let mut b = false;
+        let mut x = 0;
+
+        for c in s.chars() {
+            if "0123456789".contains(c) {
+                x += (c as u8 - 48) << if b {0} else {4};
+            }
+
+            if "ABCDEF".contains(c) {
+                x += (c as u8 - 65 + 10) << if b {0} else {4};
+            }
+
+            b = !b;
+
+            if !b {
+                data.push(x);
+                x = 0;
+            }
+        }
+
+        return data;
+    }
+
+    pub fn matches(&self, data: &[u8]) -> bool {
+        if data.len() != self.masked_val.len() {
+            println!("Invalid size : {} {}", data.len(), self.masked_val.len());
+            println!("{:?} {:?}", data, self.masked_val);
+            return false;
+        }
+
+        for i in 0..data.len() {
+            if (data[i] & self.mask[i]) != self.masked_val[i] {
+                println!("{}", i);
+                return false;
+            }
+        }
+
+        return true;
     }
 }

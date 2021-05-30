@@ -128,6 +128,16 @@ mod tests {
             "name" : "Alpha Juno-2",
             "commands" : [
                 {
+                    "name" : "Individual Tone Parameter",
+                    "midi" : "F0 41 36 0n 23 20 01 p v F7",
+                    "parameters" : [
+                        "n : 0.5 : Channel",
+                        "p : 1 : Parameter",
+                        "v : 1 : Value"
+                    ],
+                    "alias" : "ipr parameter param"
+                },
+                {
                     "name" : "Program Parameter Request",
                     "midi" : "F0 42 3n 0B 10 p F7",
                     "parameters" : [
@@ -159,6 +169,9 @@ mod tests {
         assert!(s.has_command("pc"));
         assert!(s.has_command("param-change"));
         assert!(s.has_command("Program Parameter Change"));
+
+        let command = s.get_command("ipr").unwrap();
+        assert!(command.matches(&[0xF0, 0x41, 0x36, 0x00, 0x23, 0x20, 0x01, 0x01, 0x01, 0xF7]));
     }
 }
 

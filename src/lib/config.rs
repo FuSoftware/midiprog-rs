@@ -65,15 +65,7 @@ impl Config {
 
             // Commands
             for c_val in val["commands"].members() {
-                let mut c = MidiCommand::new(c_val["name"].as_str().unwrap().to_owned());
-                c.midi = c_val["midi"].as_str().unwrap().to_owned();
-                c.add_aliases(c_val["alias"].as_str().unwrap().to_owned());
-
-                for param_val in c_val["parameters"].members() {
-                    c.add_parameter(MidiParameter::new_parse(
-                        param_val.as_str().unwrap()
-                    ));
-                }
+                let c = MidiCommand::from_json(c_val);
                 synth.commands.push(c);
             }
 
