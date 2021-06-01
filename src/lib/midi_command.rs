@@ -141,56 +141,86 @@ impl MidiCommand {
         }
     }
 
+    pub fn destringify_byte(s: &str) -> u8 {
+        if s.len() == 1 {
+            let c = s.chars().next().unwrap();
+            if "0123456789".contains(c) {
+                return c as u8 - 48;
+            } else if "ABCDEF".contains(c) {
+                return c as u8 - 65 + 10;
+            }else {
+                return 0x00;
+            }
+        } else if s.len() == 2 {
+            let mut c = s.chars();
+
+            let mut x = 0x00;
+            let mut b = false;
+
+            for _i in 0..2 {
+                let cc = c.next().unwrap();
+
+                if "0123456789".contains(cc) {
+                    x += (cc as u8 - 48) << if b {0} else {4};
+                } else if "ABCDEF".contains(cc) {
+                    x += (cc as u8 - 65 + 10) << if b {0} else {4};
+                }
+
+                b = !b;
+            }
+            
+            return x;
+        } else {
+            return 0x00;
+        }
+    }
+
     pub fn destringify(code: &str) -> Vec<u8> {
-        let s = code.replace(" ", "");
         let mut data: Vec<u8> = Vec::new();
 
-        let mut b = false;
-        let mut x = 0;
-
-        for c in s.chars() {
-            if "0123456789".contains(c) {
-                x += (0xF) << if b {0} else {4};
-            }
-
-            if "ABCDEF".contains(c) {
-                x += (0xF) << if b {0} else {4};
-            }
-
-            b = !b;
-
-            if !b {
-                data.push(x);
-                x = 0;
-            }
+        for b in code.split(" ") {
+            data.push(MidiCommand::destringify_byte(b));
         }
+
+        println!("{:?}", data);
 
         return data;
     }
 
+    pub fn maskify_byte(s: &str) -> u8 {
+        if s.len() == 1 {
+            if "0123456789ABCDEF".contains(s.chars().next().unwrap()) {
+                return 0xFF;
+            } else {
+                return 0x00;
+            }
+        } else if s.len() == 2 {
+            let mut c = s.chars();
+
+            let mut x = 0x00;
+
+            if "0123456789ABCDEF".contains(c.next().unwrap()) {
+                x += 0xF0;
+            }
+
+            if "0123456789ABCDEF".contains(c.next().unwrap()) {
+                x += 0x0F;
+            }
+
+            return x;
+        } else {
+            return 0x00;
+        }
+    }
+
     pub fn maskify(code: &str) -> Vec<u8> {
-        let s = code.replace(" ", "");
         let mut data: Vec<u8> = Vec::new();
 
-        let mut b = false;
-        let mut x = 0;
-
-        for c in s.chars() {
-            if "0123456789".contains(c) {
-                x += (c as u8 - 48) << if b {0} else {4};
-            }
-
-            if "ABCDEF".contains(c) {
-                x += (c as u8 - 65 + 10) << if b {0} else {4};
-            }
-
-            b = !b;
-
-            if !b {
-                data.push(x);
-                x = 0;
-            }
+        for b in code.split(" ") {
+            data.push(MidiCommand::maskify_byte(b));
         }
+
+        println!("{:?}", data);
 
         return data;
     }

@@ -37,12 +37,5 @@
             ],
             "alias" : "ack"
         }
-    ],
-    "callbacks" : [
-        {
-            "name" : "Individual Tone Parameter",
-            "midi" : "F0 41 36 0x 23 20 01 y x F7",
-            "alias" : "ipr"
-        }
     ]
 }
