@@ -42,6 +42,7 @@ pub enum InterpreterCommand {
     Synth(String),
     MidiConfig(String),
     Port(usize, Option<usize>),
+    InputCallback(fn(u64, &[u8])),
     PortList,
     Channel(i8),
     Receive(u32),
@@ -329,6 +330,11 @@ impl Interpreter {
                 if let Some(o) = midi_out {
                     self.interface.set_output_port(o)?;
                 }
+                Ok(())
+            }
+
+            InterpreterCommand::InputCallback(callback) => {
+                self.interface.update_callback(callback)?;
                 Ok(())
             }
 

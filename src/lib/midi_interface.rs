@@ -42,6 +42,7 @@ impl std::fmt::Display for MidiInterfaceError {
 pub struct MidiInterface {
     in_conn: Option<midir::MidiInputConnection<()>>,
     out_conn: Option<midir::MidiOutputConnection>,
+    in_port: usize
 }
 
 impl MidiInterface {
@@ -49,6 +50,27 @@ impl MidiInterface {
         MidiInterface {
             in_conn: None,
             out_conn: None,
+            in_port: 0,
+        }
+    }
+
+    pub fn update_callback(&mut self, callback: fn(u64, &[u8]) ) -> Result<(), MidiInterfaceError>  {
+        let in_m = midir::MidiInput::new("midi-prog")?;
+        let in_ports = in_m.ports();
+        if let Some(p) = in_ports.get(self.in_port) {
+            self.in_conn = Some(
+                in_m.connect(
+                    p,
+                    "midi-in",
+                    move |stamp, message, _| {
+                        callback(stamp, message);
+                    },
+                    (),
+                )?
+            );
+            Ok(())
+        } else {
+            Err(MidiInterfaceError::PortDoesNotExist(format!("MIDI input port {} doesn't exist", self.in_port)))
         }
     }
 
@@ -66,6 +88,7 @@ impl MidiInterface {
                     (),
                 )?
             );
+            self.in_port = midi_in;
             Ok(())
         } else {
             Err(MidiInterfaceError::PortDoesNotExist(format!("MIDI input port {} doesn't exist", midi_in)))
