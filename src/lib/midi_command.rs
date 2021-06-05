@@ -141,6 +141,21 @@ impl MidiCommand {
         }
     }
 
+    pub fn extract_values(&self, data: &[u8]) -> Vec<u8> {
+        let mut result: Vec<u8> = Vec::new();
+
+        for i in 0..data.len() {
+            let m = self.mask[i];
+
+            if m != 0xFF {
+                let dat = data[i] & !m; 
+                result.push(dat);
+            }
+        }
+
+        return result;
+    }
+
     pub fn destringify_byte(s: &str) -> u8 {
         if s.len() == 1 {
             let c = s.chars().next().unwrap();
@@ -182,8 +197,6 @@ impl MidiCommand {
             data.push(MidiCommand::destringify_byte(b));
         }
 
-        println!("{:?}", data);
-
         return data;
     }
 
@@ -220,8 +233,6 @@ impl MidiCommand {
             data.push(MidiCommand::maskify_byte(b));
         }
 
-        println!("{:?}", data);
-
         return data;
     }
 
@@ -234,7 +245,6 @@ impl MidiCommand {
 
         for i in 0..data.len() {
             if (data[i] & self.mask[i]) != self.masked_val[i] {
-                println!("{}", i);
                 return false;
             }
         }
