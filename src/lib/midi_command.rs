@@ -238,8 +238,6 @@ impl MidiCommand {
 
     pub fn matches(&self, data: &[u8]) -> bool {
         if data.len() != self.masked_val.len() {
-            println!("Invalid size : {} {}", data.len(), self.masked_val.len());
-            println!("{:?} {:?}", data, self.masked_val);
             return false;
         }
 
