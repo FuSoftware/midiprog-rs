@@ -42,7 +42,7 @@ pub enum InterpreterCommand {
     Synth(String),
     MidiConfig(String),
     Port(usize, Option<usize>),
-    InputCallback(fn(u64, &[u8])),
+    InputCallback(fn(&[String], &[u8])),
     PortList,
     Channel(i8),
     Receive(u32),
@@ -262,6 +262,10 @@ impl Interpreter {
         Ok(())
     }
 
+    pub fn a_test(a: u64, b: &[u8]) {
+
+    }
+
     pub fn run_command(&mut self, command: InterpreterCommand) -> Result<(), InterpreterError> {
         match command {
             InterpreterCommand::Interactive => {
@@ -323,7 +327,7 @@ impl Interpreter {
             }
 
             InterpreterCommand::Port(midi_in, midi_out) => {
-                self.interface.set_input_port(midi_in, |_stamp, message|{
+                self.interface.set_input_port(midi_in, |_stamp, message, _|{
                     println!("{:?}", message);
                 })?;
 
@@ -334,7 +338,24 @@ impl Interpreter {
             }
 
             InterpreterCommand::InputCallback(callback) => {
-                self.interface.update_callback(callback)?;
+                let s: HashMap<String, MidiCommand> = self.sysex.clone();
+
+                self.interface.update_callback(move |_stamp, message, ()| {
+                    let mut v: Vec<String> = Vec::new();
+                    let mut d: Vec<u8> = Vec::new();
+                    
+                    for (label, command) in &s {
+                        if command.matches(message) {
+                            v.push(label.clone());
+
+                            if d.is_empty() {
+                                d = command.extract_values(message);
+                            }
+                        }
+                    }
+
+                    callback(&v, &d);
+                })?;
                 Ok(())
             }
 

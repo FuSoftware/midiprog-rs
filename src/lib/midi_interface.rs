@@ -54,7 +54,7 @@ impl MidiInterface {
         }
     }
 
-    pub fn update_callback(&mut self, callback: fn(u64, &[u8]) ) -> Result<(), MidiInterfaceError>  {
+    pub fn update_callback<F>(&mut self, callback: F) -> Result<(), MidiInterfaceError> where F: FnMut(u64, &[u8], &mut ()) + Send + 'static {
         let in_m = midir::MidiInput::new("midi-prog")?;
         let in_ports = in_m.ports();
         if let Some(p) = in_ports.get(self.in_port) {
@@ -62,9 +62,7 @@ impl MidiInterface {
                 in_m.connect(
                     p,
                     "midi-in",
-                    move |stamp, message, _| {
-                        callback(stamp, message);
-                    },
+                    callback,
                     (),
                 )?
             );
@@ -74,7 +72,7 @@ impl MidiInterface {
         }
     }
 
-    pub fn set_input_port(&mut self, midi_in: usize, callback: fn(u64, &[u8]) ) -> Result<(), MidiInterfaceError>  {
+    pub fn set_input_port<F>(&mut self, midi_in: usize, callback: F) -> Result<(), MidiInterfaceError> where F: FnMut(u64, &[u8], &mut ()) + Send + 'static {
         let in_m = midir::MidiInput::new("midi-prog")?;
         let in_ports = in_m.ports();
         if let Some(p) = in_ports.get(midi_in) {
@@ -82,9 +80,7 @@ impl MidiInterface {
                 in_m.connect(
                     p,
                     "midi-in",
-                    move |stamp, message, _| {
-                        callback(stamp, message);
-                    },
+                    callback,
                     (),
                 )?
             );
@@ -110,7 +106,7 @@ impl MidiInterface {
         
     }
 
-    pub fn set_ports(&mut self, midi_in: usize, midi_out: usize, callback: fn(u64, &[u8])) -> Result<(), MidiInterfaceError> {
+    pub fn set_ports<F>(&mut self, midi_in: usize, midi_out: usize, callback: F) -> Result<(), MidiInterfaceError>  where F: FnMut(u64, &[u8], &mut ()) + Send + 'static {
         self.set_input_port(midi_in, callback)?;
         self.set_output_port(midi_out)?;
         Ok(())
