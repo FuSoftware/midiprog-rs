@@ -36,13 +36,12 @@ impl std::fmt::Display for InterpreterError {
     }
 }
 
-pub enum InterpreterCommand {
+pub enum InterpreterCommand{
     Interactive,
     Config(String),
     Synth(String),
     MidiConfig(String),
     Port(usize, Option<usize>),
-    InputCallback(fn(&[String], &[u8])),
     PortList,
     Channel(i8),
     Receive(u32),
@@ -72,6 +71,28 @@ impl Interpreter {
             midi: HashMap::new(),
             sysex: HashMap::new(),
         }
+    }
+
+    pub fn set_input_callback<F>(&mut self, callback: F) -> Result<(), InterpreterError> where F: Fn(&[String], &[u8]) + Send + 'static {
+        let s: HashMap<String, MidiCommand> = self.sysex.clone();
+
+        self.interface.update_callback(move |_stamp, message, ()| {
+            let mut v: Vec<String> = Vec::new();
+            let mut d: Vec<u8> = Vec::new();
+            
+            for (label, command) in &s {
+                if command.matches(message) {
+                    v.push(label.clone());
+
+                    if d.is_empty() {
+                        d = command.extract_values(message);
+                    }
+                }
+            }
+
+            callback(&v, &d);
+        })?;
+        Ok(())
     }
 
     pub fn run_file(&mut self, contents: String) {}
@@ -262,10 +283,6 @@ impl Interpreter {
         Ok(())
     }
 
-    pub fn a_test(a: u64, b: &[u8]) {
-
-    }
-
     pub fn run_command(&mut self, command: InterpreterCommand) -> Result<(), InterpreterError> {
         match command {
             InterpreterCommand::Interactive => {
@@ -334,28 +351,6 @@ impl Interpreter {
                 if let Some(o) = midi_out {
                     self.interface.set_output_port(o)?;
                 }
-                Ok(())
-            }
-
-            InterpreterCommand::InputCallback(callback) => {
-                let s: HashMap<String, MidiCommand> = self.sysex.clone();
-
-                self.interface.update_callback(move |_stamp, message, ()| {
-                    let mut v: Vec<String> = Vec::new();
-                    let mut d: Vec<u8> = Vec::new();
-                    
-                    for (label, command) in &s {
-                        if command.matches(message) {
-                            v.push(label.clone());
-
-                            if d.is_empty() {
-                                d = command.extract_values(message);
-                            }
-                        }
-                    }
-
-                    callback(&v, &d);
-                })?;
                 Ok(())
             }
 
