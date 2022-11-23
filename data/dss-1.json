@@ -7,8 +7,8 @@
             "name" : "Program Parameter Request",
             "midi" : "F0 42 3n 0B 10 p F7",
             "parameters" : [
-                "n : 0.5 : Channel",
-                "p : 1 : Parameter"
+                "n : 1 : Channel",
+                "p : 2 : Parameter"
             ],
             "alias" : "pr"
         },
@@ -16,7 +16,7 @@
             "name" : "Mode Request",
             "midi" : "F0 42 3n 0B 12 F7",
             "parameters" :  [
-                "n : 0.5 : Channel"
+                "n : 1 : Channel"
             ],
             "alias" : "mr"
         },
@@ -24,9 +24,9 @@
             "name" : "PCM Data Request",
             "midi" : "F0 42 3n 0B 14 a b F7",
             "parameters" :  [
-                "n : 0.5 : Channel",
-                "a : 6 : Start Address",
-                "b : 6 : Last Address + 1"
+                "n : 1 : Channel",
+                "a : 12 : Start Address",
+                "b : 12 : Last Address + 1"
             ],
             "alias" : "pcm"
         },
@@ -34,9 +34,9 @@
             "name" : "Parameter Change",
             "midi" : "F0 42 3n 0B 41 p v F7",
             "parameters" :  [
-                "n : 0.5 : Channel",
-                "p : 1 : Parameter",
-                "v : 1 : Value"
+                "n : 1 : Channel",
+                "p : 2 : Parameter",
+                "v : 2 : Value"
             ],
             "alias" : "pc param parameter parameter-change"
         },
@@ -44,8 +44,8 @@
             "name" : "Mode Change",
             "midi" : "F0 42 3n 0B 42 m F7",
             "parameters" :  [
-                "n : 0.5 : Channel",
-                "m : 1 : Mode"
+                "n : 1 : Channel",
+                "m : 2 : Mode"
             ],
             "alias" : "mc mode mode-change"
         }

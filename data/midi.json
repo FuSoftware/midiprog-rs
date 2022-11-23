@@ -7,9 +7,9 @@
             "name" : "Note Off",
             "midi" : "8n k v",
             "parameters" : [
-                "n : 0.5 : Channel",
-                "k : 1 : Key",
-                "v : 1 : Velocity"
+                "n : 1 : Channel",
+                "k : 2 : Key",
+                "v : 2 : Velocity"
             ],
             "alias" : "note-off note- noteoff noff n-"
         },
@@ -17,9 +17,9 @@
             "name" : "Note On",
             "midi" : "9n k v",
             "parameters" : [
-                "n : 0.5 : Channel",
-                "k : 1 : Key",
-                "v : 1 : Velocity"
+                "n : 1 : Channel",
+                "k : 2 : Key",
+                "v : 2 : Velocity"
             ],
             "alias" : "note-on note+ noteon non n+"
         },
@@ -27,9 +27,9 @@
             "name" : "Polyphonic Key Pressure",
             "midi" : "An k v",
             "parameters" : [
-                "n : 0.5 : Channel",
-                "k : 1 : Key",
-                "v : 1 : Velocity"
+                "n : 1 : Channel",
+                "k : 2 : Key",
+                "v : 2 : Velocity"
             ],
             "alias" : "polyphonic-key-pressure polykey poly pk"
         },
@@ -37,9 +37,9 @@
             "name" : "Control Change",
             "midi" : "Bn c v",
             "parameters" : [
-                "n : 0.5 : Channel",
-                "c : 1 : Controller",
-                "v : 1 : Value"
+                "n : 1 : Channel",
+                "c : 2 : Controller",
+                "v : 2 : Value"
             ],
             "alias" : "control-change control cc"
         },
@@ -47,8 +47,8 @@
             "name" : "Program Change",
             "midi" : "Cn p",
             "parameters" : [
-                "n : 0.5 : Channel",
-                "p : 1 : Program"
+                "n : 1 : Channel",
+                "p : 2 : Program"
             ],
             "alias" : "program-change program pc"
         },
@@ -56,8 +56,8 @@
             "name" : "Channel Pressure",
             "midi" : "Dn v",
             "parameters" : [
-                "n : 0.5 : Channel",
-                "v : 1 : Pressure"
+                "n : 1 : Channel",
+                "v : 2 : Pressure"
             ],
             "alias" : "channel-pressure cp"
         },
@@ -65,9 +65,9 @@
             "name" : "Pitch Bend Change",
             "midi" : "En l m",
             "parameters" : [
-                "n : 0.5 : Channel",
-                "l : 1 : LSB",
-                "m : 1 : MSB"
+                "n : 1 : Channel",
+                "l : 2 : LSB",
+                "m : 2 : MSB"
             ],
             "alias" : "pitch-bend-change pitch pitch-bend pb"
         }

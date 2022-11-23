@@ -55,9 +55,9 @@ impl fmt::Display for Command {
         // stream: `f`. Returns `fmt::Result` which indicates whether the
         // operation succeeded or failed. Note that `write!` uses syntax which
         // is very similar to `println!`.
-        writeln!(f, "{}", self.name);
+        writeln!(f, "{}", self.name)?;
         for (k, v) in &self.parameters {
-            writeln!(f, "  - {} {}", k, v);
+            writeln!(f, "  - {} {}", k, v)?;
         }
         write!(f, "{}", "")
     }
@@ -67,13 +67,13 @@ pub struct CommandParser {}
 
 impl CommandParser {
     pub fn get_commands_file_name(file: String) -> Result<Vec<String>, std::io::Error> {
-        return Ok(CommandParser::get_commands_file(File::open(file)?));
+        return CommandParser::get_commands_file(File::open(file)?);
     }
 
-    pub fn get_commands_file(mut file: File) -> Vec<String> {
+    pub fn get_commands_file(mut file: File) -> Result<Vec<String>, std::io::Error> {
         let mut contents = String::new();
         file.read_to_string(&mut contents);
-        return CommandParser::get_commands(contents);
+        return Ok(CommandParser::get_commands(contents));
     }
 
     pub fn get_commands(content: String) -> Vec<String> {
@@ -102,15 +102,15 @@ impl CommandParser {
     }
 
     pub fn parse_commands_file_name(file: &str) -> Result<Vec<Command>, std::io::Error> {
-        let commands = CommandParser::get_commands_file(File::open(file)?);
+        let commands = CommandParser::get_commands_file(File::open(file)?)?;
         let r = CommandParser::parse_commands(commands.as_slice());
         return Ok(r);
     }
 
-    pub fn parse_commands_file(file: File) -> Vec<Command> {
-        let commands = CommandParser::get_commands_file(file);
+    pub fn parse_commands_file(file: File) -> Result<Vec<Command>, std::io::Error> {
+        let commands = CommandParser::get_commands_file(file)?;
         let r = CommandParser::parse_commands(&commands);
-        return r;
+        return Ok(r);
     }
 
     pub fn parse_commands<T: AsRef<str>>(content: &[T]) -> Vec<Command> {

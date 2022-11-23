@@ -21,7 +21,7 @@ mod tests {
     #[test]
     fn test_param_half_byte() {
         let p: lib::midi_command::MidiParameter =
-            lib::midi_command::MidiParameter::new_str("n", 0.5, "Channel");
+            lib::midi_command::MidiParameter::new_str("n", 1, "Channel");
         assert_eq!(p.characters(), 1);
         assert_eq!(p.midi(10), "a");
     }
@@ -29,7 +29,7 @@ mod tests {
     #[test]
     fn test_param_full_byte() {
         let p: lib::midi_command::MidiParameter =
-            lib::midi_command::MidiParameter::new_str("n", 1.0, "Channel");
+            lib::midi_command::MidiParameter::new_str("n", 2, "Channel");
         assert_eq!(p.characters(), 2);
         assert_eq!(p.midi(10), "0a");
         assert_eq!(p.midi(254), "fe");
@@ -38,11 +38,11 @@ mod tests {
     #[test]
     fn test_command() {
         let n: lib::midi_command::MidiParameter =
-            lib::midi_command::MidiParameter::new_str("n", 0.5, "Channel");
+            lib::midi_command::MidiParameter::new_str("n", 1, "Channel");
         let p: lib::midi_command::MidiParameter =
-            lib::midi_command::MidiParameter::new_str("p", 1.0, "Parameter");
+            lib::midi_command::MidiParameter::new_str("p", 2, "Parameter");
         let v: lib::midi_command::MidiParameter =
-            lib::midi_command::MidiParameter::new_str("v", 1.0, "Value");
+            lib::midi_command::MidiParameter::new_str("v", 2, "Value");
         let mut m: lib::midi_command::MidiCommand =
             lib::midi_command::MidiCommand::new("Parameter Change".to_owned());
         m.midi = String::from("F0 0n p v F7");
@@ -61,7 +61,7 @@ mod tests {
 
     #[test]
     fn test_parser() {
-        let c = lib::command_parser::CommandParser::parse_command(String::from("command -name \"Program Parameter Request\" -midi \"F0 42 3n 0B 10 p F7\" -@parameter \"n : 0.5 : Channel\" -@parameter \"p : 1 : Parameter\" -alias \"pr\"")).unwrap();
+        let c = lib::command_parser::CommandParser::parse_command(String::from("command -name \"Program Parameter Request\" -midi \"F0 42 3n 0B 10 p F7\" -@parameter \"n : 1 : Channel\" -@parameter \"p : 2 : Parameter\" -alias \"pr\"")).unwrap();
         assert_eq!(c.name, "command");
         assert!(c.has_parameter("name"));
         assert!(c.has_parameter("midi"));
@@ -102,8 +102,8 @@ mod tests {
 
         conf.run_commands_str(&vec![
             "synth -id \"ju-2\" -name \"Alpha Juno-2\" -manufacturer \"Roland\"",
-            "command -name \"Program Parameter Request\" -midi \"F0 42 3n 0B 10 p F7\" -@parameter \"n : 0.5 : Channel\" -@parameter \"p : 1 : Parameter\" -alias \"pr\"",
-            "command -name \"Program Parameter Change\" -midi \"F0 41 3n 0B 10 p v F7\" -@parameter \"n : 0.5 : Channel\" -@parameter \"p : 1 : Parameter\" -@parameter \"v : 1 : Value\" -alias \"pc param-change\""
+            "command -name \"Program Parameter Request\" -midi \"F0 42 3n 0B 10 p F7\" -@parameter \"n : 1 : Channel\" -@parameter \"p : 2 : Parameter\" -alias \"pr\"",
+            "command -name \"Program Parameter Change\" -midi \"F0 41 3n 0B 10 p v F7\" -@parameter \"n : 1 : Channel\" -@parameter \"p : 2 : Parameter\" -@parameter \"v : 2 : Value\" -alias \"pc param-change\""
         ]);
 
         let s: &lib::synth::Synth = conf.get_current_synth().expect("No synth loaded");
@@ -131,9 +131,9 @@ mod tests {
                     "name" : "Individual Tone Parameter",
                     "midi" : "F0 41 36 0n 23 20 01 p v F7",
                     "parameters" : [
-                        "n : 0.5 : Channel",
-                        "p : 1 : Parameter",
-                        "v : 1 : Value"
+                        "n : 1 : Channel",
+                        "p : 2 : Parameter",
+                        "v : 2 : Value"
                     ],
                     "alias" : "ipr parameter param"
                 },
@@ -141,8 +141,8 @@ mod tests {
                     "name" : "Program Parameter Request",
                     "midi" : "F0 42 3n 0B 10 p F7",
                     "parameters" : [
-                        "n : 0.5 : Channel",
-                        "p : 1 : Parameter"
+                        "n : 1 : Channel",
+                        "p : 2 : Parameter"
                     ],
                     "alias" : "pr"
                 },
@@ -150,9 +150,9 @@ mod tests {
                     "name" : "Program Parameter Change",
                     "midi" : "F0 41 3n 0B 10 p v F7",
                     "parameters" : [
-                        "n : 0.5 : Channel",
-                        "p : 1 : Parameter",
-                        "v : 1 : Value"
+                        "n : 1 : Channel",
+                        "p : 2 : Parameter",
+                        "v : 2 : Value"
                     ],
                     "alias" : "pc param-change"
                 }

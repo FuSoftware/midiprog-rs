@@ -7,9 +7,9 @@
             "name" : "Individual Tone Parameter",
             "midi" : "F0 41 36 0n 23 20 01 p v F7",
             "parameters" : [
-                "n : 0.5 : Channel",
-                "p : 1 : Parameter",
-                "v : 1 : Value"
+                "n : 1 : Channel",
+                "p : 2 : Parameter",
+                "v : 2 : Value"
             ],
             "alias" : "ipr parameter param"
         },
@@ -17,7 +17,7 @@
             "name" : "Want Send File",
             "midi" : "F0 41 40 0n 23 F7",
             "parameters" :  [
-                "n : 0.5 : Channel"
+                "n : 1 : Channel"
             ],
             "alias" : "wsf sendfile"
         },
@@ -25,7 +25,7 @@
             "name" : "Request File",
             "midi" : "F0 41 41 0n 23 F7",
             "parameters" :  [
-                "n : 0.5 : Channel"
+                "n : 1 : Channel"
             ],
             "alias" : "rqf requestfile"
         },
@@ -33,7 +33,7 @@
             "name" : "Acknowledge",
             "midi" : "F0 41 43 0n 23 F7",
             "parameters" :  [
-                "n : 0.5 : Channel"
+                "n : 1 : Channel"
             ],
             "alias" : "ack"
         }

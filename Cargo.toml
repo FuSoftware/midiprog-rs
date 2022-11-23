@@ -9,7 +9,7 @@ edition = "2018"
 [dependencies]
 lazy_static = "1"
 regex = "1"
-midir = "0.6"
+midir = "0.8"
 rustyline = "6.2"
 json = "*"
 derive_more = "*"

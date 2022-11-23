@@ -3,16 +3,16 @@ use super::utils::*;
 #[derive(Debug, Clone)]
 pub struct MidiParameter {
     key: String,
-    size: f32,
+    size: usize,
     pub name: String,
 }
 
 impl MidiParameter {
-    pub fn new(key: String, size: f32, name: String) -> MidiParameter {
+    pub fn new(key: String, size: usize, name: String) -> MidiParameter {
         MidiParameter { key, size, name }
     }
 
-    pub fn new_str(key: &str, size: f32, name: &str) -> MidiParameter {
+    pub fn new_str(key: &str, size: usize, name: &str) -> MidiParameter {
         MidiParameter {
             key: key.to_owned(),
             size: size,
@@ -26,14 +26,14 @@ impl MidiParameter {
         MidiParameter::new_str(
             trimmed[0],
             trimmed[1]
-                .parse::<f32>()
+                .parse::<usize>()
                 .expect("Failed to parse parameter size"),
             trimmed[2],
         )
     }
 
     pub fn characters(&self) -> usize {
-        (self.size * 2.0).round() as usize
+        self.size
     }
 
     pub fn midi(&self, value: usize) -> String {
